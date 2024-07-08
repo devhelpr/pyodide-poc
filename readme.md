@@ -8,3 +8,7 @@ This is a simple example of how to integrate a Python script with a TypeScript s
 - npm run dev
 
 In the console of the browser the result of a simple scikit-learn script will be displayed.
+
+## Info
+
+See https://pyodide.org/en/stable/usage/working-with-bundlers.html
