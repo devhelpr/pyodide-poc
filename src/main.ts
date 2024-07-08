@@ -1,7 +1,7 @@
 import "./style.css";
 import { loadPyodide } from "pyodide";
 
-async function hello_python() {
+async function runPytonCode() {
   let pyodide = await loadPyodide({ indexURL: "pyodide" }); //indexURL: "pyodide",
   await pyodide.loadPackage(["numpy", "scikit-learn"]);
   return pyodide.runPythonAsync(`import numpy as np
@@ -12,6 +12,6 @@ centroid
 `);
 }
 
-hello_python().then((result) => {
+runPytonCode().then((result) => {
   console.log("result =", result.toString());
 });
