@@ -5,6 +5,8 @@ interface CustomWorker extends Worker {
   data: string;
   setResult: (result: string) => void;
   pyodide: PyodideInterface | undefined;
+  iter: number;
+  clusters: number;
 }
 declare var self: CustomWorker;
 
@@ -23,7 +25,10 @@ self.onmessage = async (e: MessageEvent<any>) => {
     await initPython();
     postMessage({ type: "initialised" });
   }
-  if (e.data === "start") {
+  if (e.data && e.data.type === "start") {
+    self.iter = e.data.params.iter ?? 0;
+    self.clusters = e.data.params.clusters ?? 0;
+
     await runPytonCode().then((_result) => {
       console.timeEnd("pyodide-python");
       postMessage({ type: "result", result: resultList });

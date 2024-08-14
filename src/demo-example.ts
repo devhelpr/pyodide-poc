@@ -9,6 +9,8 @@ start = time.time()
 
 from js import data
 from js import setResult
+from js import iter
+from js import clusters
 
 csv_data = StringIO(data)
 
@@ -17,7 +19,7 @@ print(df.head())
 
 X = df[['length', '#URLs', '#mentions', '#hashs', 'verified', '#followers', 'user_engagement', 'sentiment_score']]
 y = df['pred_label']
-hbac = BiasAwareHierarchicalKModes(n_iter=20, min_cluster_size=20).fit(X, y)
+hbac = BiasAwareHierarchicalKModes(n_iter=iter, min_cluster_size=clusters).fit(X, y)
 setResult(hbac.n_clusters_)
 setResult(hbac.scores_)
 
