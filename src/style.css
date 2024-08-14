@@ -1,7 +1,6 @@
-#app {
-  white-space: pre-wrap;
-  font-family: monospace;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 .hidden {
   display: none;
