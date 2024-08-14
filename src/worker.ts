@@ -1,13 +1,23 @@
 import { loadPyodide } from "pyodide";
 import { demoCode } from "./demo-example";
+
+interface CustomWorker extends Worker {
+  data: string;
+  setResult: (result: string) => void;
+}
+declare var self: CustomWorker;
+
 self.onmessage = async (e: MessageEvent<any>) => {
   console.log("Worker got message", e.data);
-  setTimeout(() => postMessage("Hello back"), 1000);
 
   const data = await fetch("/test_pred_BERT.csv").then((response) =>
     response.text()
   );
-  self["data"] = data;
+  self.data = data;
+  let resultList: string[] = [];
+  self.setResult = (...result) => {
+    resultList.push(result.join(" "));
+  };
 
   async function runPytonCode() {
     let pyodide = await loadPyodide({ indexURL: "/pyodide" });
@@ -24,7 +34,9 @@ self.onmessage = async (e: MessageEvent<any>) => {
     return pyodide.runPythonAsync(demoCode);
   }
 
-  runPytonCode().then((result) => {
+  runPytonCode().then((_result) => {
     console.timeEnd("pyodide-python");
+    postMessage({ type: "result", result: resultList });
   });
 };
+export {};

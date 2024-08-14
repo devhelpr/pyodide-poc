@@ -9,7 +9,13 @@ const main = () => {
   });
   const worker = factory();
 
-  worker.onmessage = (e) => console.log(e);
+  worker.onmessage = (e) => {
+    if (e.data.type && e.data.type === "result") {
+      let result: string[] = e.data.result;
+      result.forEach((result) => console.log(result.toString()));
+    }
+    console.log(e);
+  };
   worker.onerror = (e) => console.error(e);
   worker.postMessage("Hello world");
 };
