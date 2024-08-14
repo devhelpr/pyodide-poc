@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-
-const workerFactory = (workerScript: URL, workerOptions: WorkerOptions) => () =>
-  new Worker(workerScript, workerOptions);
+import PythonWorker from "./worker?worker";
 
 export const App = () => {
   const workerRef = useRef<Worker | undefined>(undefined);
@@ -12,10 +10,7 @@ export const App = () => {
     setLoader("");
     setShowButton(false);
     setResult("");
-    const factory = workerFactory(new URL("./worker.ts", import.meta.url), {
-      type: "module",
-    });
-    workerRef.current = factory();
+    workerRef.current = new PythonWorker();
     workerRef.current.onmessage = (e) => {
       if (e.data.type && e.data.type === "initialised") {
         setShowButton(true);
