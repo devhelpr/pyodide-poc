@@ -3,8 +3,9 @@ import PythonWorker from "./worker?worker";
 
 export const App = () => {
   const workerRef = useRef<Worker | undefined>(undefined);
-  const [result, setResult] = useState<string>("");
+  const [result, setResult] = useState<string[]>([]);
   const [loader, setLoader] = useState<string>("");
+  const [resultIndex, setResultIndex] = useState<number>(0);
   const [showAndEnableControls, setShowAndEnableControls] =
     useState<boolean>(false);
   const [iter, setIter] = useState<number>(10);
@@ -13,7 +14,7 @@ export const App = () => {
   useEffect(() => {
     setLoader("");
     setShowAndEnableControls(false);
-    setResult("");
+    setResult([]);
     workerRef.current = new PythonWorker();
     workerRef.current.onmessage = (e) => {
       if (e.data.type && e.data.type === "initialised") {
@@ -25,7 +26,11 @@ export const App = () => {
         outputResult.forEach((result) => {
           output += result + "\n\r";
         });
-        setResult(output);
+        setResult((result) => {
+          setResultIndex(result.length);
+          return [...result, output];
+        });
+
         setLoader("hidden");
         setShowAndEnableControls(true);
       } else {
@@ -41,7 +46,6 @@ export const App = () => {
 
   const buttonClickHandler = () => {
     setLoader("");
-    setResult("");
     setShowAndEnableControls(false);
     workerRef.current?.postMessage({
       type: "start",
@@ -89,16 +93,60 @@ export const App = () => {
           />
         </div>
       </div>
-      <button
-        className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${
-          showAndEnableControls ? "" : "hidden"
-        }`}
-        onClick={buttonClickHandler}
-      >
-        start
-      </button>
-      <div className={`loader ${loader}`}></div>
-      <div className="whitespace-pre-wrap font-mono mt-4">{result}</div>
+      <div className="flex gap-4 mb-4 items-center">
+        <button
+          disabled={!showAndEnableControls}
+          className={` text-white font-bold py-2 px-4 rounded ${
+            showAndEnableControls
+              ? "bg-blue-500 hover:bg-blue-700"
+              : "bg-blue-300"
+          }`}
+          onClick={buttonClickHandler}
+        >
+          start
+        </button>
+        <div className={`loader ${loader} max-h-[20px] max-w-[20px]`}></div>
+      </div>
+      <div className="flex flex-row gap-4">
+        <button
+          type="button"
+          className={`${
+            showAndEnableControls && resultIndex > 0
+              ? "cursor-pointer"
+              : "text-gray-400"
+          }`}
+          disabled={!showAndEnableControls || resultIndex <= 0}
+          onClick={() => {
+            if (resultIndex > 0) {
+              setResultIndex((resultIndex) => resultIndex - 1);
+            }
+          }}
+        >
+          Previous
+        </button>
+        <button
+          type="button"
+          className={`${
+            showAndEnableControls && resultIndex < result.length - 1
+              ? "cursor-pointer"
+              : "text-gray-400"
+          }`}
+          disabled={!showAndEnableControls || resultIndex >= result.length - 1}
+          onClick={() => {
+            if (resultIndex < result.length - 1) {
+              setResultIndex((resultIndex) => resultIndex + 1);
+            }
+          }}
+        >
+          Next
+        </button>
+        <span>
+          {result.length == 0 ? 0 : resultIndex + 1} / {result.length}
+        </span>
+      </div>
+      <div className="whitespace-pre-wrap font-mono mt-4">
+        {result?.[resultIndex]}
+      </div>
     </div>
   );
 };

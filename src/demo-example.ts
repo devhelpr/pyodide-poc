@@ -12,10 +12,15 @@ from js import setResult
 from js import iter
 from js import clusters
 
+setResult('Parameters:')
+setResult('Iterations:', iter)
+setResult('Clusters:', clusters)
+setResult('')
+
 csv_data = StringIO(data)
 
 df = pd.read_csv(csv_data)
-print(df.head())
+setResult(df.head())
 
 X = df[['length', '#URLs', '#mentions', '#hashs', 'verified', '#followers', 'user_engagement', 'sentiment_score']]
 y = df['pred_label']
@@ -38,7 +43,10 @@ df_cluster4['Cluster'] = '4'
 full_df = pd.concat([df_cluster0, df_cluster1, df_cluster2, df_cluster3, df_cluster4], ignore_index=True)
 full_df.head()
 
+
+setResult('')
 setResult('graphs, but no graphs')
+setResult('')
 setResult(full_df.groupby('Cluster')['length'].value_counts().unstack())
 setResult(full_df.groupby('Cluster')['#URLs'].value_counts().unstack())
 setResult(full_df.groupby('Cluster')['#mentions'].value_counts().unstack())
