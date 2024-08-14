@@ -15,12 +15,11 @@ self.onmessage = async (e: MessageEvent<any>) => {
     resultList.push(result.join(" "));
   };
 
-  const data = await fetch("/test_pred_BERT.csv").then((response) =>
-    response.text()
-  );
-  self.data = data;
-
   if (e.data === "init") {
+    const data = await fetch("/test_pred_BERT.csv").then((response) =>
+      response.text()
+    );
+    self.data = data;
     await initPython();
     postMessage({ type: "initialised" });
   }
