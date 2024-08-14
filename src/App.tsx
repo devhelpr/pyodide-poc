@@ -5,19 +5,19 @@ export const App = () => {
   const workerRef = useRef<Worker | undefined>(undefined);
   const [result, setResult] = useState<string>("");
   const [loader, setLoader] = useState<string>("");
-  const [showButton, setShowButton] = useState<boolean>(false);
+  const [showAndEnableControls, setShowAndEnableControls] =
+    useState<boolean>(false);
   const [iter, setIter] = useState<number>(10);
   const [clusters, setClusters] = useState<number>(20);
-  const iterRef = useRef<number>(iter);
-  const clustersRef = useRef<number>(clusters);
+
   useEffect(() => {
     setLoader("");
-    setShowButton(false);
+    setShowAndEnableControls(false);
     setResult("");
     workerRef.current = new PythonWorker();
     workerRef.current.onmessage = (e) => {
       if (e.data.type && e.data.type === "initialised") {
-        setShowButton(true);
+        setShowAndEnableControls(true);
         setLoader("hidden");
       } else if (e.data.type && e.data.type === "result") {
         const outputResult: string[] = e.data.result;
@@ -27,7 +27,7 @@ export const App = () => {
         });
         setResult(output);
         setLoader("hidden");
-        setShowButton(true);
+        setShowAndEnableControls(true);
       } else {
         console.log(e);
       }
@@ -39,37 +39,23 @@ export const App = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (iter !== iterRef.current) {
-      iterRef.current = iter;
-    }
-  }, [iter]);
-  useEffect(() => {
-    if (clusters !== clustersRef.current) {
-      clustersRef.current = clusters;
-    }
-  }, [clusters]);
-
   const buttonClickHandler = () => {
     setLoader("");
     setResult("");
-    setShowButton(false);
+    setShowAndEnableControls(false);
     workerRef.current?.postMessage({
       type: "start",
       params: {
-        iter: iterRef.current,
-        clusters: clustersRef.current,
+        iter: iter,
+        clusters: clusters,
       },
     });
   };
+
   return (
     <div className="p-4 md:max-w-[50%] max-w-full mx-auto">
       <h1 className="text-xl font-bold">Bias detection tool</h1>
-      <div
-        className={`md:max-w-[50%] max-w-full py-4 ${
-          showButton ? "" : "hidden"
-        }`}
-      >
+      <div className={`md:max-w-[50%] max-w-full py-4 `}>
         <div className="flex flex-col mb-4">
           <label htmlFor="iter">Iterations</label>
           <input
@@ -79,6 +65,7 @@ export const App = () => {
             min="0"
             max="100"
             step="1"
+            disabled={!showAndEnableControls}
             value={iter}
             onChange={(e) => {
               setIter(parseInt(e.target.value) ?? 0);
@@ -94,6 +81,7 @@ export const App = () => {
             min="0"
             max="100"
             step="1"
+            disabled={!showAndEnableControls}
             value={clusters}
             onChange={(e) => {
               setClusters(parseInt(e.target.value) ?? 0);
@@ -103,7 +91,7 @@ export const App = () => {
       </div>
       <button
         className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${
-          showButton ? "" : "hidden"
+          showAndEnableControls ? "" : "hidden"
         }`}
         onClick={buttonClickHandler}
       >
