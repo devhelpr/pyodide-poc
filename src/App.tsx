@@ -69,6 +69,7 @@ export const App = () => {
             min="0"
             max="100"
             step="1"
+            title={iter.toString()}
             disabled={!showAndEnableControls}
             value={iter}
             onChange={(e) => {
@@ -85,6 +86,7 @@ export const App = () => {
             min="0"
             max="100"
             step="1"
+            title={clusters.toString()}
             disabled={!showAndEnableControls}
             value={clusters}
             onChange={(e) => {
