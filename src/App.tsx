@@ -6,6 +6,7 @@ export const App = () => {
   const [resultIndex, setResultIndex] = useState<number>(0);
   const [showAndEnableControls, setShowAndEnableControls] =
     useState<boolean>(false);
+
   const [iter, setIter] = useState<number>(10);
   const [clusters, setClusters] = useState<number>(20);
 
