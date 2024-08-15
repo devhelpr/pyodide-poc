@@ -1,8 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import PythonWorker from "./worker?worker";
-
+import { useCallback, useEffect, useState } from "react";
+import { PythonWorkerMessage, usePython } from "./use-python";
 export const App = () => {
-  const workerRef = useRef<Worker | undefined>(undefined);
   const [result, setResult] = useState<string[]>([]);
   const [loader, setLoader] = useState<string>("");
   const [resultIndex, setResultIndex] = useState<number>(0);
@@ -11,17 +9,13 @@ export const App = () => {
   const [iter, setIter] = useState<number>(10);
   const [clusters, setClusters] = useState<number>(20);
 
-  useEffect(() => {
-    setLoader("");
-    setShowAndEnableControls(false);
-    setResult([]);
-    workerRef.current = new PythonWorker();
-    workerRef.current.onmessage = (e) => {
-      if (e.data.type && e.data.type === "initialised") {
+  const onMessageEvent = useCallback(
+    (event: MessageEvent<PythonWorkerMessage>) => {
+      if (event.data.type && event.data.type === "initialised") {
         setShowAndEnableControls(true);
         setLoader("hidden");
-      } else if (e.data.type && e.data.type === "result") {
-        const outputResult: string[] = e.data.result;
+      } else if (event.data.type && event.data.type === "result") {
+        const outputResult: string[] = event.data.result;
         let output = "";
         outputResult.forEach((result) => {
           output += result + "\n\r";
@@ -34,20 +28,24 @@ export const App = () => {
         setLoader("hidden");
         setShowAndEnableControls(true);
       } else {
-        console.log(e);
+        console.log(event);
       }
-    };
-    workerRef.current.onerror = (e) => console.error(e);
-    workerRef.current.postMessage("init");
-    return () => {
-      workerRef.current?.terminate();
-    };
+    },
+    [result, resultIndex]
+  );
+
+  const { postMessage } = usePython(onMessageEvent);
+
+  useEffect(() => {
+    setLoader("");
+    setShowAndEnableControls(false);
+    setResult([]);
   }, []);
 
   const buttonClickHandler = () => {
     setLoader("");
     setShowAndEnableControls(false);
-    workerRef.current?.postMessage({
+    postMessage({
       type: "start",
       params: {
         iter: iter,
